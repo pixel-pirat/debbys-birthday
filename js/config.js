@@ -1,14 +1,19 @@
 /* ============================================================
-   ✦ CONFIG — the only file you need to touch ✦
-   Change `name` below, or use the "Personalize" button in the
-   top-right corner (saved in your browser, no code needed).
-   You can also link straight to it:  index.html?name=Sam
+   ✦ CONFIG — defaults, used until the real content loads from the
+   server (js/main.js calls BDAY.loadFromServer() on startup), and as
+   the fallback if the server can't be reached.
+
+   The name/letter/sign/sub and uploaded photos/music are the SHARED,
+   real content now — stored in Postgres + Vercel Blob (see api/), set
+   from the Personalize panel with the admin passphrase. Anyone who
+   opens the page sees the same thing; this file is just what's shown
+   for the instant before that loads, and the safety net if it can't.
    ============================================================ */
 (function () {
   "use strict";
 
   var DEFAULTS = {
-    name: "Aria",
+    name: "Deborah",
 
     /* {name} is replaced automatically */
     letter:
@@ -65,8 +70,7 @@
       },
     ],
 
-    /* Photos: set `src` to an image path (e.g. "photos/us.jpg")
-       and it replaces the emoji placeholder. */
+    /* `src` is filled in from the server's media table once it loads. */
     memories: [
       { emoji: "🌙", caption: "the night we stayed too late", hue: 268, src: null },
       { emoji: "📸", caption: "your laugh, on record", hue: 332, src: null },
@@ -74,17 +78,6 @@
     ],
   };
 
-  var KEY = "bday.personal.v1";
-
-  function read() {
-    try {
-      return JSON.parse(localStorage.getItem(KEY) || "{}") || {};
-    } catch (e) {
-      return {};
-    }
-  }
-
-  var saved = read();
   var state = {
     name: DEFAULTS.name,
     letter: DEFAULTS.letter,
@@ -92,15 +85,28 @@
     sub: DEFAULTS.sub,
   };
 
-  ["name", "letter", "sign", "sub"].forEach(function (k) {
-    if (typeof saved[k] === "string" && saved[k].trim()) state[k] = saved[k];
-  });
-
+  var urlName = null;
   try {
     var params = new URLSearchParams(location.search);
     var q = params.get("name") || params.get("to");
-    if (q && q.trim()) state.name = q.trim().slice(0, 22);
+    if (q && q.trim()) urlName = q.trim().slice(0, 22);
   } catch (e) {}
+  if (urlName) state.name = urlName;
+
+  var TOKEN_KEY = "bday.admin.token";
+  function getToken() {
+    try {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+  function setToken(t) {
+    try {
+      if (t) localStorage.setItem(TOKEN_KEY, t);
+      else localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {}
+  }
 
   function fill(str) {
     return String(str == null ? "" : str).replace(/\{name\}/g, state.name);
@@ -112,6 +118,8 @@
     wishes: DEFAULTS.wishes,
     memories: DEFAULTS.memories,
     fill: fill,
+    getToken: getToken,
+    setToken: setToken,
 
     resolved: function () {
       return {
@@ -122,19 +130,51 @@
       };
     },
 
+    /* Pulls the shared name/letter/sign/sub and media URLs from the
+       server. Resolves with the server's data, or null if it couldn't
+       be reached (the built-in defaults above stay in place). A name
+       given in the URL (?name=) always wins, so a personalised link
+       still shows that name even once the server content loads. */
+    loadFromServer: function () {
+      return fetch("/api/content")
+        .then(function (r) {
+          if (!r.ok) throw new Error("bad response");
+          return r.json();
+        })
+        .then(function (data) {
+          if (!urlName && data.name) state.name = data.name;
+          if (data.letter) state.letter = data.letter;
+          if (data.sign) state.sign = data.sign;
+          if (data.sub) state.sub = data.sub;
+          if (data.media) {
+            DEFAULTS.memories.forEach(function (m, i) {
+              var mm = data.media["memory-" + i];
+              m.src = mm ? mm.url : null;
+            });
+          }
+          return data;
+        })
+        .catch(function () {
+          return null;
+        });
+    },
+
+    /* Saves name/letter/sign/sub to the server. Needs the admin
+       passphrase (set via BDAY.setToken) or the server rejects it. */
     save: function (patch) {
       Object.assign(state, patch);
-      try {
-        localStorage.setItem(
-          KEY,
-          JSON.stringify({
-            name: state.name,
-            letter: state.letter,
-            sign: state.sign,
-            sub: state.sub,
-          })
-        );
-      } catch (e) {}
+      return fetch("/api/content", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-admin-token": getToken() },
+        body: JSON.stringify({ name: state.name, letter: state.letter, sign: state.sign, sub: state.sub }),
+      }).then(function (r) {
+        if (!r.ok) {
+          return r.json().then(function (d) {
+            throw new Error((d && d.error) || "Save failed.");
+          });
+        }
+        return true;
+      });
     },
 
     reset: function () {
@@ -142,9 +182,6 @@
       state.letter = DEFAULTS.letter;
       state.sign = DEFAULTS.sign;
       state.sub = DEFAULTS.sub;
-      try {
-        localStorage.removeItem(KEY);
-      } catch (e) {}
     },
   };
 })();

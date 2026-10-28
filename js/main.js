@@ -112,11 +112,6 @@
   }
 
   /* ---------------------------------------------------------- your own photos & music */
-  function objectUrlFor(key, file) {
-    if (window.BdayMedia && BdayMedia.urlFor) return BdayMedia.urlFor(key, file);
-    return URL.createObjectURL(file);
-  }
-
   function refreshPhotoThumb(i) {
     var m = BDAY.memories[i];
     var thumb = $("#pThumb" + i);
@@ -125,29 +120,48 @@
   }
 
   function applyPhoto(i, file) {
-    BDAY.memories[i].src = objectUrlFor("memory-" + i, file);
+    var slot = "memory-" + i;
+    var previous = BDAY.memories[i].src;
+    var previewUrl = URL.createObjectURL(file);
+    BDAY.memories[i].src = previewUrl;
     buildMemories();
     refreshPhotoThumb(i);
     var clearBtn = $('[data-clear-photo="' + i + '"]');
     if (clearBtn) clearBtn.hidden = false;
-    if (window.BdayMedia && BdayMedia.supported()) {
-      BdayMedia.put("memory-" + i, file).then(function () {
-        toast("Photo saved to this device ✦");
-      }).catch(function () {
-        toast("Photo applied — but couldn't save it for next time");
+
+    toast("Uploading…");
+    BdayMedia.upload(slot, file)
+      .then(function (d) {
+        BDAY.memories[i].src = d.url;
+        buildMemories();
+        refreshPhotoThumb(i);
+        toast("Photo saved — everyone who opens this page will see it ✦");
+      })
+      .catch(function (e) {
+        BDAY.memories[i].src = previous;
+        buildMemories();
+        refreshPhotoThumb(i);
+        if (clearBtn) clearBtn.hidden = !previous;
+        toast(e && e.message ? e.message : "Couldn't save that photo.");
       });
-    } else {
-      toast("Photo applied for this visit — this browser can't save it for next time");
-    }
   }
 
   function clearPhoto(i) {
+    var slot = "memory-" + i;
+    var previous = BDAY.memories[i].src;
     BDAY.memories[i].src = null;
     buildMemories();
     refreshPhotoThumb(i);
     var clearBtn = $('[data-clear-photo="' + i + '"]');
     if (clearBtn) clearBtn.hidden = true;
-    if (window.BdayMedia && BdayMedia.supported()) BdayMedia.del("memory-" + i).catch(function () {});
+
+    BdayMedia.remove(slot).catch(function (e) {
+      BDAY.memories[i].src = previous;
+      buildMemories();
+      refreshPhotoThumb(i);
+      if (clearBtn) clearBtn.hidden = false;
+      toast(e && e.message ? e.message : "Couldn't remove that photo.");
+    });
   }
 
   function buildPhotoUploads() {
@@ -194,26 +208,32 @@
   var fMusicClear = $("#fMusicClear");
 
   function applyMusic(file) {
-    var url = objectUrlFor("music", file);
-    BdayAudio.setCustomTrack(url);
+    var previewUrl = URL.createObjectURL(file);
+    BdayAudio.setCustomTrack(previewUrl);
     if (fMusicLabel) fMusicLabel.textContent = file.name || "your song";
     if (fMusicClear) fMusicClear.hidden = false;
-    if (window.BdayMedia && BdayMedia.supported()) {
-      BdayMedia.put("music", file).then(function () {
-        toast("Your song is saved to this device ✦");
-      }).catch(function () {
-        toast("Playing your song — but couldn't save it for next time");
+
+    toast("Uploading…");
+    BdayMedia.upload("music", file)
+      .then(function (d) {
+        BdayAudio.setCustomTrack(d.url);
+        toast("Your song is saved — everyone who opens this page will hear it ✦");
+      })
+      .catch(function (e) {
+        BdayAudio.clearCustomTrack();
+        if (fMusicLabel) fMusicLabel.textContent = "Choose an audio file…";
+        if (fMusicClear) fMusicClear.hidden = true;
+        toast(e && e.message ? e.message : "Couldn't save that song.");
       });
-    } else {
-      toast("Playing your song for this visit — this browser can't save it for next time");
-    }
   }
 
   function clearMusicFile() {
     BdayAudio.clearCustomTrack();
     if (fMusicLabel) fMusicLabel.textContent = "Choose an audio file…";
     if (fMusicClear) fMusicClear.hidden = true;
-    if (window.BdayMedia && BdayMedia.supported()) BdayMedia.del("music").catch(function () {});
+    BdayMedia.remove("music").catch(function (e) {
+      toast(e && e.message ? e.message : "Couldn't remove that song.");
+    });
   }
 
   if (fMusic) {
@@ -224,29 +244,22 @@
   }
   if (fMusicClear) fMusicClear.addEventListener("click", clearMusicFile);
 
-  function loadSavedMedia() {
-    if (!window.BdayMedia || !BdayMedia.supported()) return;
-    BDAY.memories.forEach(function (m, i) {
-      BdayMedia.get("memory-" + i)
-        .then(function (file) {
-          if (!file) return;
-          m.src = BdayMedia.urlFor("memory-" + i, file);
-          buildMemories();
-          refreshPhotoThumb(i);
-          var clearBtn = $('[data-clear-photo="' + i + '"]');
-          if (clearBtn) clearBtn.hidden = false;
-        })
-        .catch(function () {});
+  /* applies whatever the server already has for music, once it's loaded */
+  function applyServerMusic(media) {
+    var mm = media && media.music;
+    if (!mm) return;
+    BdayAudio.setCustomTrack(mm.url);
+    if (fMusicLabel) fMusicLabel.textContent = mm.filename || "your song";
+    if (fMusicClear) fMusicClear.hidden = false;
+  }
+
+  /* ---------------------------------------------------------- admin passphrase */
+  var fToken = $("#fToken");
+  if (fToken) {
+    fToken.value = BDAY.getToken();
+    fToken.addEventListener("change", function () {
+      BDAY.setToken(fToken.value.trim());
     });
-    BdayMedia.get("music")
-      .then(function (file) {
-        if (!file) return;
-        var url = BdayMedia.urlFor("music", file);
-        BdayAudio.setCustomTrack(url);
-        if (fMusicLabel) fMusicLabel.textContent = file.name || "your song";
-        if (fMusicClear) fMusicClear.hidden = false;
-      })
-      .catch(function () {});
   }
 
   function paint() {
@@ -596,28 +609,41 @@
   $("#sheetClose").addEventListener("click", closeSheet);
   scrim.addEventListener("click", closeSheet);
 
-  $("#saveBtn").addEventListener("click", function () {
+  var saveBtn = $("#saveBtn");
+  saveBtn.addEventListener("click", function () {
     var name = $("#fName").value.trim().slice(0, 22) || BDAY.DEFAULTS.name;
     var letter = $("#fLetter").value.trim() || BDAY.DEFAULTS.letter;
     var sign = $("#fSign").value.trim() || BDAY.DEFAULTS.sign;
     var sub = $("#fSub").value.trim() || BDAY.DEFAULTS.sub;
-    BDAY.save({ name: name, letter: letter, sign: sign, sub: sub });
-    paint();
-    if (letterOpened) {
-      if (letterTyping) completeTyping();
-      var lb = $("#letterBody");
-      lb.style.minHeight = "";
-      lb.textContent = BDAY.resolved().letter;
-    }
-    closeSheet();
-    toast("Saved. Now look up ✦");
-    BdayAudio.sparkle();
-    if (entered) {
-      FX.celebrate(1800);
-      setTimeout(function () {
-        FX.burst(window.innerWidth / 2, window.innerHeight * 0.3, { type: "heart", hue: 340, power: 1.2 });
-      }, 350);
-    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
+    BDAY.save({ name: name, letter: letter, sign: sign, sub: sub })
+      .then(function () {
+        paint();
+        if (letterOpened) {
+          if (letterTyping) completeTyping();
+          var lb = $("#letterBody");
+          lb.style.minHeight = "";
+          lb.textContent = BDAY.resolved().letter;
+        }
+        closeSheet();
+        toast("Saved — everyone who opens this page sees it now ✦");
+        BdayAudio.sparkle();
+        if (entered) {
+          FX.celebrate(1800);
+          setTimeout(function () {
+            FX.burst(window.innerWidth / 2, window.innerHeight * 0.3, { type: "heart", hue: 340, power: 1.2 });
+          }, 350);
+        }
+      })
+      .catch(function (e) {
+        toast(e && e.message ? e.message : "Couldn't save. Check the passphrase above.");
+      })
+      .finally(function () {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save & celebrate";
+      });
   });
 
   $("#resetBtn").addEventListener("click", function () {
@@ -812,7 +838,18 @@
   observeReveals();
   watchFinale();
   onScroll();
-  loadSavedMedia();
+
+  /* The real, shared content (name/letter/photos/song) lives on the
+     server — this is what makes it show the same way for everyone who
+     opens the link, not just whoever set it up. Paints again once it's
+     in, on top of the defaults already showing. */
+  BDAY.loadFromServer().then(function (data) {
+    if (!data) return;
+    paint();
+    buildMemories();
+    buildPhotoUploads();
+    applyServerMusic(data.media);
+  });
 
   var y = $("#footYear");
   if (y) y.textContent = new Date().getFullYear();

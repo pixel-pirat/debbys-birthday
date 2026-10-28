@@ -227,9 +227,11 @@ window.BdayAudio = (function () {
     }, 520);
   }
 
-  /* url: an object URL (from URL.createObjectURL) for an audio file.
-     Swaps it in for the synthesised melody; loops; routed through the
-     same music bus (reverb, mute, fades) as everything else. */
+  /* url: an audio file URL (a same-origin blob: URL, or a cross-origin
+     one like Vercel Blob's — crossOrigin is set so createMediaElementSource
+     doesn't taint the graph either way). Swaps it in for the synthesised
+     melody; loops; routed through the same music bus (reverb, mute,
+     fades) as everything else. */
   function setCustomTrack(url) {
     if (!init()) return false;
     stopMusic();
@@ -241,6 +243,7 @@ window.BdayAudio = (function () {
     customEl = new Audio();
     customEl.loop = true;
     customEl.preload = "auto";
+    customEl.crossOrigin = "anonymous";
     customEl.src = url;
     try {
       customSrcNode = ctx.createMediaElementSource(customEl);

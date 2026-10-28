@@ -1,0 +1,26 @@
+{
+  "name": "birthday",
+  "version": "1.0.0",
+  "description": "A hand-built, single-page birthday universe: a name assembled from stardust, a cake you can actually blow out, fireworks with real physics, a sealed letter, and a very unreasonable amount of glitter.",
+  "main": "serve.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "node scripts/migrate.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pixel-pirat/debbys-birthday.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pixel-pirat/debbys-birthday/issues"
+  },
+  "homepage": "https://github.com/pixel-pirat/debbys-birthday#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "@vercel/blob": "^2.8.2"
+  }
+}

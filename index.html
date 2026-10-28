@@ -143,7 +143,6 @@
     </div>
 
     <div class="polaroid-row" id="polaroidRow"><!-- built by js --></div>
-    <p class="memory-hint reveal">swap these for your own photos — upload them in <strong>Personalize</strong>, or hard-code them in <code>js/config.js</code></p>
   </section>
 
   <!-- ░░ 05 · letter ░░ -->
@@ -191,9 +190,9 @@
       <p class="finale-tiny">press <kbd>F</kbd> for fireworks · <kbd>M</kbd> for music · <kbd>P</kbd> to personalize</p>
     </div>
     <footer class="foot">
-      <span>built by hand, with a dangerous amount of glitter</span>
+      <span>built for you Debby</span>
       <span class="foot-dot">✦</span>
-      <span id="footYear">2026</span>
+      <span id="footYear">Happy Birthday</span>
     </footer>
   </section>
 </main>
@@ -209,6 +208,11 @@
     <button class="icon-btn" id="sheetClose" type="button" aria-label="Close">✕</button>
   </div>
   <div class="sheet-body">
+    <label class="field">
+      <span>Admin passphrase</span>
+      <input id="fToken" type="password" placeholder="needed to save changes" autocomplete="off" />
+      <small id="fTokenStatus">Only needed to change anything below — visitors never see this field's contents.</small>
+    </label>
     <label class="field">
       <span>Their name</span>
       <input id="fName" type="text" maxlength="22" placeholder="Deborah" autocomplete="off" />
