@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Happy Birthday ✦ a little universe for you</title>
+<meta name="description" content="A hand-built universe of fireworks, wishes and terrible puns — because today is your birthday." />
+<meta name="theme-color" content="#07020f" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,800;1,500;1,600&family=Sora:wght@200;300;400;600&family=Great+Vibes&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="is-locked">
+
+<!-- ░░ ambient layers ░░ -->
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true">
+  <span class="aurora-blob a"></span>
+  <span class="aurora-blob b"></span>
+  <span class="aurora-blob c"></span>
+</div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ░░ entry gate ░░ -->
+<div class="gate" id="gate">
+  <div class="gate-orb" aria-hidden="true"></div>
+  <div class="gate-inner">
+    <p class="gate-kicker">a very small universe for</p>
+    <p class="gate-name" id="gateName">Aria</p>
+    <p class="gate-line">today the sky is wearing its best colours.</p>
+    <button class="btn btn-primary btn-glow" id="enterBtn" type="button">
+      <span>Open your surprise</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2l2.2 6.2L20.5 9l-5 4.2 1.6 6.3L12 16l-5.1 3.5 1.6-6.3-5-4.2 6.3-.8L12 2z" fill="currentColor"/></svg>
+    </button>
+    <p class="gate-note">best with sound on 🎧</p>
+  </div>
+  <div class="gate-hint">press anywhere to begin</div>
+</div>
+
+<!-- ░░ chrome ░░ -->
+<div class="progress"><i id="progressBar"></i></div>
+
+<header class="nav">
+  <a class="brand" href="#hero">
+    <span class="brand-mark">✦</span>
+    <span class="brand-text" id="navName">Deborah</span>
+  </a>
+  <div class="nav-actions">
+    <button class="chip" id="personalizeBtn" type="button" title="Personalize (P)">
+      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4zM17 5l2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Personalize</span>
+    </button>
+    <button class="chip" id="musicBtn" type="button" aria-pressed="true" title="Music (M)">
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="chip-label">Music</span>
+    </button>
+    <button class="chip" id="fireBtn" type="button" title="Fireworks (F)">
+      <span class="spark">✦</span>
+      <span class="chip-label">Fireworks</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ░░ 01 · hero ░░ -->
+  <section class="hero" id="hero">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="rule"></span> happy birthday <span class="rule"></span></p>
+      <h1 class="sr-only">Happy Birthday, <span id="srName">Deborah</span>!</h1>
+      <div class="name-stage">
+        <canvas id="nameCanvas" aria-hidden="true"></canvas>
+      </div>
+      <p class="hero-sub">You are the reason the sky keeps doing this.</p>
+      <p class="hero-tiny">scroll — there's a cake, a letter, and far too much glitter down here</p>
+    </div>
+    <a class="scroll-cue" href="#cake" aria-label="Scroll to the cake">
+      <span class="mouse"><i></i></span>
+      <span>scroll</span>
+    </a>
+  </section>
+
+  <!-- ░░ 02 · cake ░░ -->
+  <section class="section section-cake" id="cake">
+    <div class="section-head reveal">
+      <p class="chapter">chapter one</p>
+      <h2 class="section-title">Make a wish, <em id="cakeName">Deborah</em>.</h2>
+      <p class="section-lead">Lean in close. Blow out the candles — or just tap them, the universe is flexible.</p>
+    </div>
+
+    <div class="cake-stage reveal">
+      <div class="cake-halo" aria-hidden="true"></div>
+      <div class="cake" id="cakeEl" role="group" aria-label="A three-tier birthday cake with three candles">
+        <div class="candle-row" id="candleRow">
+          <button class="candle" type="button" data-i="1" aria-label="Blow out candle 1">
+            <span class="wick"></span><span class="flame"></span><span class="flame-glow"></span>
+          </button>
+          <button class="candle tall" type="button" data-i="2" aria-label="Blow out candle 2">
+            <span class="wick"></span><span class="flame"></span><span class="flame-glow"></span>
+          </button>
+          <button class="candle" type="button" data-i="3" aria-label="Blow out candle 3">
+            <span class="wick"></span><span class="flame"></span><span class="flame-glow"></span>
+          </button>
+        </div>
+        <div class="tier tier-sm"><span class="icing"></span><span class="drip"></span><span class="shine"></span></div>
+        <div class="tier tier-md"><span class="icing"></span><span class="drip"></span><span class="shine"></span></div>
+        <div class="tier tier-lg"><span class="icing"></span><span class="drip"></span><span class="shine"></span></div>
+        <div class="plate"></div>
+        <div class="cake-shadow"></div>
+      </div>
+
+      <div class="cake-controls">
+        <button class="btn btn-primary" id="blowBtn" type="button">Blow them out</button>
+        <button class="btn btn-ghost" id="micBtn" type="button">
+          <span class="mic-dot"></span> use my real breath
+        </button>
+      </div>
+      <p class="wish-status" id="wishStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ░░ 03 · wishes ░░ -->
+  <section class="section section-wishes" id="wishes">
+    <div class="section-head reveal">
+      <p class="chapter">chapter two</p>
+      <h2 class="section-title">Six things the universe<br /><em>wants you to know</em></h2>
+      <p class="section-lead">Tap a card. They're sealed with slightly unhinged optimism.</p>
+    </div>
+
+    <div class="wish-grid" id="wishGrid"><!-- built by js --></div>
+  </section>
+
+  <!-- ░░ 04 · memories ░░ -->
+  <section class="section section-memories" id="memories">
+    <div class="section-head reveal">
+      <p class="chapter">chapter three</p>
+      <h2 class="section-title">A few frames<br /><em>from our film</em></h2>
+      <p class="section-lead">Polaroids fade. The good parts don't.</p>
+    </div>
+
+    <div class="polaroid-row" id="polaroidRow"><!-- built by js --></div>
+    <p class="memory-hint reveal">swap these for your own photos — upload them in <strong>Personalize</strong>, or hard-code them in <code>js/config.js</code></p>
+  </section>
+
+  <!-- ░░ 05 · letter ░░ -->
+  <section class="section section-letter" id="letter">
+    <div class="section-head reveal">
+      <p class="chapter">chapter four</p>
+      <h2 class="section-title">The part I actually<br /><em>wanted to say</em></h2>
+    </div>
+
+    <div class="letter-wrap reveal">
+      <div class="letter-seal-wrap" id="sealWrap">
+        <div class="letter-card" id="letterCard">
+          <p class="letter-date" id="letterDate">for your birthday</p>
+          <p class="letter-body" id="letterBody"></p>
+          <p class="letter-sign" id="letterSign">always in your corner</p>
+        </div>
+        <div class="letter-cover" id="letterCover" aria-hidden="true">
+          <p class="cover-kicker">a letter, sealed with good intentions</p>
+          <p class="cover-name" id="coverName">Deborah</p>
+          <p class="cover-line">break the seal ✦</p>
+        </div>
+        <div class="seal-shadow" aria-hidden="true"></div>
+        <button class="seal" id="sealBtn" type="button" aria-label="Break the seal and read the letter">
+          <span class="seal-glyph">✦</span>
+          <span class="seal-text">break<br />the seal</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ 06 · finale ░░ -->
+  <section class="section section-finale" id="finale">
+    <div class="balloons" id="balloons" aria-hidden="true"></div>
+    <div class="finale-inner">
+      <p class="chapter">the last page (for now)</p>
+      <h2 class="finale-title">
+        <span class="line1">Happy Birthday,</span>
+        <span class="line2" id="finaleName">Deborah</span>
+      </h2>
+      <p class="finale-sub" id="finaleSub">Again. Louder. With fireworks this time.</p>
+      <div class="finale-actions">
+        <button class="btn btn-primary btn-glow" id="againBtn" type="button">One more round ✦</button>
+        <button class="btn btn-ghost" id="replayBtn" type="button">↺ start over</button>
+      </div>
+      <p class="finale-tiny">press <kbd>F</kbd> for fireworks · <kbd>M</kbd> for music · <kbd>P</kbd> to personalize</p>
+    </div>
+    <footer class="foot">
+      <span>built by hand, with a dangerous amount of glitter</span>
+      <span class="foot-dot">✦</span>
+      <span id="footYear">2026</span>
+    </footer>
+  </section>
+</main>
+
+<!-- ░░ personalize panel ░░ -->
+<div class="sheet-scrim" id="sheetScrim" hidden></div>
+<aside class="sheet" id="sheet" aria-hidden="true" aria-labelledby="sheetTitle" role="dialog" aria-modal="true">
+  <div class="sheet-head">
+    <div>
+      <p class="chapter">make it yours</p>
+      <h3 id="sheetTitle">Personalize</h3>
+    </div>
+    <button class="icon-btn" id="sheetClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-body">
+    <label class="field">
+      <span>Their name</span>
+      <input id="fName" type="text" maxlength="22" placeholder="Aria" autocomplete="off" />
+      <small>This becomes the particle text. Short names look best.</small>
+    </label>
+    <label class="field">
+      <span>The letter</span>
+      <textarea id="fLetter" rows="9"></textarea>
+      <small>Use <code>{name}</code> anywhere and it'll be replaced.</small>
+    </label>
+    <label class="field">
+      <span>Sign it</span>
+      <input id="fSign" type="text" maxlength="40" placeholder="always in your corner" />
+    </label>
+    <label class="field">
+      <span>The last line</span>
+      <input id="fSub" type="text" maxlength="90" placeholder="Again. Louder. With fireworks this time." />
+    </label>
+
+    <div class="field">
+      <span>Your photos</span>
+      <div class="photo-uploads" id="fPhotos"><!-- built by js --></div>
+      <small>Replaces the placeholders in the memories strip. Saved on this device only — nothing is uploaded anywhere.</small>
+    </div>
+
+    <div class="field">
+      <span>Your song</span>
+      <div class="music-upload">
+        <label class="upload-btn" for="fMusic">
+          <input id="fMusic" type="file" accept="audio/*" hidden />
+          <span>🎵</span>
+          <span id="fMusicLabel">Choose an audio file…</span>
+        </label>
+        <button class="link-btn" id="fMusicClear" type="button" hidden>✕ use the music-box tune instead</button>
+      </div>
+      <small>Loops quietly behind everything, in place of the built-in music box. Saved on this device only.</small>
+    </div>
+
+    <button class="link-btn" id="shareBtn" type="button">
+      <span>⧉</span> copy a link with this name baked in
+    </button>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn btn-ghost" id="resetBtn" type="button">reset</button>
+    <button class="btn btn-primary" id="saveBtn" type="button">Save &amp; celebrate</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<script src="js/config.js"></script>
+<script src="js/media.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/sky.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/name.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
